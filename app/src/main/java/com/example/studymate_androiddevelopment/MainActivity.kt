@@ -4,13 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import com.example.studymate_androiddevelopment.navigation.AppNavGraph
 import com.example.studymate_androiddevelopment.ui.theme.StudyMate_AndroidDevelopmentTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,7 +13,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             StudyMate_AndroidDevelopmentTheme {
-                com.example.studymate_androiddevelopment.ui.navigation.AppNavGraph()
+                AppNavGraph()
             }
         }
     }
