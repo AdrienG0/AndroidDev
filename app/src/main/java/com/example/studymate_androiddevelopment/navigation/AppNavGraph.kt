@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.studymate_androiddevelopment.ui.screens.addedit.AddEditTaskScreen
-import com.example.studymate_androiddevelopment.ui.courses.CoursesScreen
+import com.example.studymate_androiddevelopment.ui.screens.courses.CoursesScreen
 
 
 

@@ -1,4 +1,4 @@
-package com.example.studymate_androiddevelopment.ui.courses
+package com.example.studymate_androiddevelopment.ui.screens.courses
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
