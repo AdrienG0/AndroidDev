@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.studymate_androiddevelopment.ui.home.HomeScreen
 import com.example.studymate_androiddevelopment.ui.tasks.TasksScreen
+import com.example.studymate_androiddevelopment.ui.courses.CoursesScreen
 
 
 
