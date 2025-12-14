@@ -6,7 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,7 +18,7 @@ data class UiTask(
     val title: String,
     val courseName: String,
     val deadlineText: String,
-    val riskLabel: String // later: Low/Medium/High
+    val riskLabel: String
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,7 +29,6 @@ fun TaskListScreen(
     onOpenSettings: () -> Unit,
     onEditTask: () -> Unit
 ) {
-    // Dummy tasks for Phase 4
     var tasks by remember {
         mutableStateOf(
             listOf(
@@ -45,7 +44,7 @@ fun TaskListScreen(
                 title = { Text("StudyMate") },
                 actions = {
                     IconButton(onClick = onOpenCourses) {
-                        Icon(Icons.Default.MenuBook, contentDescription = "Courses")
+                        Icon(Icons.Default.List, contentDescription = "Courses")
                     }
                     IconButton(onClick = onOpenSettings) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")

@@ -11,7 +11,6 @@ import androidx.compose.ui.unit.dp
 fun AddEditTaskScreen(
     onBack: () -> Unit
 ) {
-    // Dummy courses list for dropdown
     val courses = listOf("Android", "Network", "Linux")
 
     var title by remember { mutableStateOf("") }
@@ -51,7 +50,6 @@ fun AddEditTaskScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // DropdownMenu (Material 3 style)
             ExposedDropdownMenuBox(
                 expanded = expanded,
                 onExpandedChange = { expanded = !expanded }
@@ -84,7 +82,6 @@ fun AddEditTaskScreen(
 
             Button(
                 onClick = {
-                    // Phase 4: only visual / no DB yet
                     onBack()
                 },
                 modifier = Modifier.fillMaxWidth()

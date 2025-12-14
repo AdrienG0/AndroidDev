@@ -1,16 +1,13 @@
 package com.example.studymate_androiddevelopment.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.studymate_androiddevelopment.ui.screens.addedit.AddEditTaskScreen
 import com.example.studymate_androiddevelopment.ui.screens.courses.CoursesScreen
-
-
-
-object Routes {
-    const val HOME = "home"
-}
+import com.example.studymate_androiddevelopment.ui.screens.settings.SettingsScreen
+import com.example.studymate_androiddevelopment.ui.screens.tasks.TaskListScreen
 
 @Composable
 fun AppNavGraph(
@@ -25,7 +22,7 @@ fun AppNavGraph(
                 onAddTask = { navController.navigate(Routes.ADD_EDIT_TASK) },
                 onOpenCourses = { navController.navigate(Routes.COURSES) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
-                onEditTask = { navController.navigate(Routes.ADD_EDIT_TASK) } // later: pass id
+                onEditTask = { navController.navigate(Routes.ADD_EDIT_TASK) }
             )
         }
 
