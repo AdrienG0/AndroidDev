@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.studymate_androiddevelopment.ui.screens.addedit.AddEditTaskScreen
 import com.example.studymate_androiddevelopment.ui.home.HomeScreen
 import com.example.studymate_androiddevelopment.ui.tasks.TasksScreen
 import com.example.studymate_androiddevelopment.ui.courses.CoursesScreen
@@ -15,24 +16,38 @@ object Routes {
 }
 
 @Composable
-fun AppNavGraph() {
-    val navController = rememberNavController()
-
+fun AppNavGraph(
+    navController: NavHostController
+) {
     NavHost(
         navController = navController,
-        startDestination = Route.Home.path
+        startDestination = Routes.TASK_LIST
     ) {
-        composable(Route.Home.path) {
-            HomeScreen(
-                onGoToCourses = { navController.navigate(Route.Courses.path) },
-                onGoToTasks = { navController.navigate(Route.Tasks.path) }
+        composable(Routes.TASK_LIST) {
+            TaskListScreen(
+                onAddTask = { navController.navigate(Routes.ADD_EDIT_TASK) },
+                onOpenCourses = { navController.navigate(Routes.COURSES) },
+                onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+                onEditTask = { navController.navigate(Routes.ADD_EDIT_TASK) } // later: pass id
             )
         }
-        composable(Route.Courses.path) {
-            CoursesScreen(onBack = { navController.popBackStack() })
+
+        composable(Routes.ADD_EDIT_TASK) {
+            AddEditTaskScreen(
+                onBack = { navController.popBackStack() }
+            )
         }
-        composable(Route.Tasks.path) {
-            TasksScreen(onBack = { navController.popBackStack() })
+
+        composable(Routes.COURSES) {
+            CoursesScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Routes.SETTINGS) {
+            SettingsScreen(
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }
