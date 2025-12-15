@@ -7,14 +7,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.studymate_androiddevelopment.viewmodel.CourseViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CoursesScreen(
+    courseViewModel: CourseViewModel,
     onBack: () -> Unit
 ) {
-    var courses by remember { mutableStateOf(listOf("Android", "Network")) }
+    val courses by courseViewModel.courses.collectAsState()
+
     var newCourse by remember { mutableStateOf("") }
+    var errorText by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
@@ -35,21 +39,32 @@ fun CoursesScreen(
         ) {
             OutlinedTextField(
                 value = newCourse,
-                onValueChange = { newCourse = it },
+                onValueChange = {
+                    newCourse = it
+                    errorText = null
+                },
                 label = { Text("New course name") },
                 modifier = Modifier.fillMaxWidth()
             )
 
+            if (errorText != null) {
+                Text(errorText!!, color = MaterialTheme.colorScheme.error)
+            }
+
             Button(
                 onClick = {
-                    if (newCourse.isNotBlank()) {
-                        courses = courses + newCourse.trim()
-                        newCourse = ""
+                    val name = newCourse.trim()
+                    if (name.isEmpty()) {
+                        errorText = "Course name is required."
+                        return@Button
                     }
+
+                    courseViewModel.addCourse(name = name, color = null)
+                    newCourse = ""
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Add course (visual)")
+                Text("Add course")
             }
 
             Divider()
@@ -61,7 +76,7 @@ fun CoursesScreen(
                 items(courses) { course ->
                     Card(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            text = course,
+                            text = course.name,
                             modifier = Modifier.padding(16.dp),
                             style = MaterialTheme.typography.titleMedium
                         )

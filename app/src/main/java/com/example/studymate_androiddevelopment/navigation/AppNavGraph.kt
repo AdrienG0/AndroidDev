@@ -43,6 +43,7 @@ fun AppNavGraph(
 
         composable(Routes.COURSES) {
             CoursesScreen(
+                courseViewModel = courseViewModel,
                 onBack = { navController.popBackStack() }
             )
         }
