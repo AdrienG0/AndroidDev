@@ -21,7 +21,7 @@ data class TaskEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0L,
     val title: String,
     val description: String? = null,
-    val dueDate: Long? = null,     
+    val dueDate: Long? = null,
     val courseId: Long? = null,
     val isDone: Boolean = false
 )
