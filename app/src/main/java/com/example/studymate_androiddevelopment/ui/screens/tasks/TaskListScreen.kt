@@ -15,6 +15,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.studymate_androiddevelopment.viewmodel.TaskViewModel
 
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
+
+private fun formatMillisToDate(millis: Long): String {
+    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    sdf.timeZone = TimeZone.getDefault()
+    return sdf.format(Date(millis))
+}
+
 data class UiTask(
     val id: Long,
     val title: String,
@@ -40,8 +51,8 @@ fun TaskListScreen(
             UiTask(
                 id = t.id,
                 title = t.title,
-                courseName = if (t.courseId == null) "No course" else "Course #${t.courseId}",
-                deadlineText = t.dueDate?.toString() ?: "No deadline",
+                courseName = t.courseName ?: "No course",
+                deadlineText = t.dueDate?.let { formatMillisToDate(it) } ?: "No deadline",
                 riskLabel = "Medium",
                 isDone = t.isDone
             )
