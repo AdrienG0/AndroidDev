@@ -98,6 +98,8 @@ fun AddEditTaskScreen(
                 onClick = {
                     val cleanTitle = title.trim()
 
+                    val dueDateMillis = parseDateToMillis(deadline)
+
                     if (cleanTitle.isEmpty()) {
                         errorText = "Title is required."
                         return@Button
@@ -106,8 +108,9 @@ fun AddEditTaskScreen(
                     taskViewModel.addTask(
                         title = cleanTitle,
                         description = null,
-                        dueDate = null,
-                        courseId = null
+                        dueDate = dueDateMillis,
+                        courseId = null,
+                        courseName = selectedCourse
                     )
 
                     onBack()
