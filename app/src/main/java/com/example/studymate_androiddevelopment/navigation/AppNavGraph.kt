@@ -36,6 +36,7 @@ fun AppNavGraph(
         composable(Routes.ADD_EDIT_TASK) {
             AddEditTaskScreen(
                 taskViewModel = taskViewModel,
+                courseViewModel = courseViewModel,
                 onBack = { navController.popBackStack() }
             )
         }

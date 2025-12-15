@@ -5,23 +5,32 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.studymate_androiddevelopment.viewmodel.CourseViewModel
 import com.example.studymate_androiddevelopment.viewmodel.TaskViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditTaskScreen(
     taskViewModel: TaskViewModel,
+    courseViewModel: CourseViewModel,   // ✅ ADD
     onBack: () -> Unit
 ) {
-    val courses = listOf("Android", "Network", "Linux")
+    val courseEntities by courseViewModel.courses.collectAsState()
 
     var title by remember { mutableStateOf("") }
     var deadline by remember { mutableStateOf("") }
 
-    var selectedCourse by remember { mutableStateOf(courses.first()) }
+    var selectedCourse by remember { mutableStateOf<String?>(null) }
     var expanded by remember { mutableStateOf(false) }
 
     var errorText by remember { mutableStateOf<String?>(null) }
+
+    // Auto-select first course when list is loaded
+    LaunchedEffect(courseEntities) {
+        if (selectedCourse == null && courseEntities.isNotEmpty()) {
+            selectedCourse = courseEntities.first().name
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -62,7 +71,7 @@ fun AddEditTaskScreen(
                 onExpandedChange = { expanded = !expanded }
             ) {
                 OutlinedTextField(
-                    value = selectedCourse,
+                    value = selectedCourse ?: "No courses yet",
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Course") },
@@ -75,11 +84,11 @@ fun AddEditTaskScreen(
                     expanded = expanded,
                     onDismissRequest = { expanded = false }
                 ) {
-                    courses.forEach { course ->
+                    courseEntities.forEach { course ->
                         DropdownMenuItem(
-                            text = { Text(course) },
+                            text = { Text(course.name) },
                             onClick = {
-                                selectedCourse = course
+                                selectedCourse = course.name
                                 expanded = false
                             }
                         )
@@ -97,7 +106,6 @@ fun AddEditTaskScreen(
             Button(
                 onClick = {
                     val cleanTitle = title.trim()
-
                     val dueDateMillis = parseDateToMillis(deadline)
 
                     if (cleanTitle.isEmpty()) {
