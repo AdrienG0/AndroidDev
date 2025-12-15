@@ -28,4 +28,8 @@ interface TaskDao {
 
     @Query("UPDATE tasks SET isDone = :done WHERE id = :taskId")
     suspend fun setDone(taskId: Long, done: Boolean)
+
+    @Query("UPDATE tasks SET courseId = NULL, courseName = NULL WHERE courseId = :courseId")
+    suspend fun clearCourseForTasks(courseId: Long)
+
 }
