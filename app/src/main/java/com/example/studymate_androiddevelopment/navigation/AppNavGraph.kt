@@ -8,10 +8,14 @@ import com.example.studymate_androiddevelopment.ui.screens.addedit.AddEditTaskSc
 import com.example.studymate_androiddevelopment.ui.screens.courses.CoursesScreen
 import com.example.studymate_androiddevelopment.ui.screens.settings.SettingsScreen
 import com.example.studymate_androiddevelopment.ui.screens.tasks.TaskListScreen
+import com.example.studymate_androiddevelopment.viewmodel.CourseViewModel
+import com.example.studymate_androiddevelopment.viewmodel.TaskViewModel
 
 @Composable
 fun AppNavGraph(
-    navController: NavHostController
+    navController: NavHostController,
+    taskViewModel: TaskViewModel,
+    courseViewModel: CourseViewModel
 ) {
     NavHost(
         navController = navController,
@@ -19,10 +23,13 @@ fun AppNavGraph(
     ) {
         composable(Routes.TASK_LIST) {
             TaskListScreen(
+                taskViewModel = taskViewModel, // ✅ add
                 onAddTask = { navController.navigate(Routes.ADD_EDIT_TASK) },
                 onOpenCourses = { navController.navigate(Routes.COURSES) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
-                onEditTask = { navController.navigate(Routes.ADD_EDIT_TASK) }
+                onEditTask = { taskId ->
+                    navController.navigate(Routes.ADD_EDIT_TASK)
+                }
             )
         }
 
