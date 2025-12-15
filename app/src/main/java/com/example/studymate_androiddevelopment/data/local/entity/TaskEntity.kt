@@ -6,7 +6,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "tasks",
+    tableName = "task_table",
     foreignKeys = [
         ForeignKey(
             entity = CourseEntity::class,
