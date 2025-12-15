@@ -13,8 +13,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.studymate_androiddevelopment.ui.events.TasksEvent
 import com.example.studymate_androiddevelopment.viewmodel.TaskViewModel
-
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -44,10 +44,10 @@ fun TaskListScreen(
     onOpenSettings: () -> Unit,
     onEditTask: (Long) -> Unit
 ) {
-    val taskEntities by taskViewModel.tasks.collectAsState()
+    val uiState by taskViewModel.uiState.collectAsState()
 
-    val tasks = remember(taskEntities) {
-        taskEntities.map { t ->
+    val tasks = remember(uiState.tasks) {
+        uiState.tasks.map { t ->
             UiTask(
                 id = t.id,
                 title = t.title,
@@ -100,12 +100,16 @@ fun TaskListScreen(
                 items(tasks) { task ->
                     TaskCard(
                         task = task,
-                        onClick = { onEditTask(task.id) }, // ✅ send id
+                        onClick = { onEditTask(task.id) },
                         onToggleDone = { newValue ->
-                            taskViewModel.toggleDone(task.id, newValue)
+                            taskViewModel.onEvent(
+                                TasksEvent.ToggleDone(taskId = task.id, newValue = newValue)
+                            )
                         },
                         onDelete = {
-                            taskViewModel.deleteTask(task.id)
+                            taskViewModel.onEvent(
+                                TasksEvent.DeleteTask(taskId = task.id)
+                            )
                         }
                     )
                 }
