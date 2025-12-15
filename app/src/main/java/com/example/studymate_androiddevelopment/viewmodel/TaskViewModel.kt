@@ -15,13 +15,14 @@ class TaskViewModel(
     val tasks = repository.getTasks()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun addTask(title: String, description: String?, dueDate: Long?, courseId: Long?) {
+    fun addTask(title: String, description: String?, dueDate: Long?, courseId: Long?, courseName: String?) {
         viewModelScope.launch {
             val task = TaskEntity(
                 title = title,
                 description = description,
                 dueDate = dueDate,
-                courseId = courseId
+                courseId = courseId,
+                courseName = courseName
             )
             repository.addTask(task)
         }
