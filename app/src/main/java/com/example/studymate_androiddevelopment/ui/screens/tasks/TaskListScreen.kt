@@ -13,29 +13,39 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.studymate_androiddevelopment.viewmodel.TaskViewModel
 
 data class UiTask(
+    val id: Long,
     val title: String,
     val courseName: String,
     val deadlineText: String,
-    val riskLabel: String
+    val riskLabel: String,
+    val isDone: Boolean
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskListScreen(
+    taskViewModel: TaskViewModel,
     onAddTask: () -> Unit,
     onOpenCourses: () -> Unit,
     onOpenSettings: () -> Unit,
-    onEditTask: () -> Unit
+    onEditTask: (Long) -> Unit
 ) {
-    var tasks by remember {
-        mutableStateOf(
-            listOf(
-                UiTask("Finish Android UI", "Android", "Tomorrow", "High"),
-                UiTask("Read networking notes", "Network", "Next week", "Low")
+    val taskEntities by taskViewModel.tasks.collectAsState()
+
+    val tasks = remember(taskEntities) {
+        taskEntities.map { t ->
+            UiTask(
+                id = t.id,
+                title = t.title,
+                courseName = if (t.courseId == null) "No course" else "Course #${t.courseId}",
+                deadlineText = t.dueDate?.toString() ?: "No deadline",
+                riskLabel = "Medium",
+                isDone = t.isDone
             )
-        )
+        }
     }
 
     Scaffold(
@@ -58,6 +68,7 @@ fun TaskListScreen(
             }
         }
     ) { padding ->
+
         if (tasks.isEmpty()) {
             Box(
                 modifier = Modifier
@@ -76,7 +87,16 @@ fun TaskListScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(tasks) { task ->
-                    TaskCard(task = task, onClick = onEditTask)
+                    TaskCard(
+                        task = task,
+                        onClick = { onEditTask(task.id) }, // ✅ send id
+                        onToggleDone = { newValue ->
+                            taskViewModel.toggleDone(task.id, newValue)
+                        },
+                        onDelete = {
+                            taskViewModel.deleteTask(task.id)
+                        }
+                    )
                 }
             }
         }
@@ -86,21 +106,50 @@ fun TaskListScreen(
 @Composable
 private fun TaskCard(
     task: UiTask,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onToggleDone: (Boolean) -> Unit,
+    onDelete: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth().clickable { onClick() }
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(task.title, style = MaterialTheme.typography.titleMedium)
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    task.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f)
+                )
+
+                Checkbox(
+                    checked = task.isDone,
+                    onCheckedChange = { onToggleDone(it) }
+                )
+            }
+
             Spacer(modifier = Modifier.height(6.dp))
             Text("Course: ${task.courseName}", style = MaterialTheme.typography.bodyMedium)
             Text("Deadline: ${task.deadlineText}", style = MaterialTheme.typography.bodyMedium)
+
             Spacer(modifier = Modifier.height(8.dp))
             AssistChip(
                 onClick = { },
                 label = { Text("Risk: ${task.riskLabel}") }
             )
+
+            Spacer(modifier = Modifier.height(12.dp))
+            Button(
+                onClick = onDelete,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+            ) {
+                Text("Delete")
+            }
         }
     }
 }
