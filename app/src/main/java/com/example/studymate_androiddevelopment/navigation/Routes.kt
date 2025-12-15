@@ -7,8 +7,11 @@ sealed class Route(val path: String) {
 }
 
 object Routes {
-    const val TASK_LIST = "task_list"
-    const val ADD_EDIT_TASK = "add_edit_task"
+    const val TASK_LIST = "tasks"
+    const val ADD_EDIT_TASK = "addEditTask"
+    const val ADD_EDIT_TASK_WITH_ID = "addEditTask/{taskId}"
     const val COURSES = "courses"
     const val SETTINGS = "settings"
+
+    fun editTask(taskId: Long) = "addEditTask/$taskId"
 }
