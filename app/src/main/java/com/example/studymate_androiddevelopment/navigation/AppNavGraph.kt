@@ -23,7 +23,7 @@ fun AppNavGraph(
     ) {
         composable(Routes.TASK_LIST) {
             TaskListScreen(
-                taskViewModel = taskViewModel, // ✅ add
+                taskViewModel = taskViewModel,
                 onAddTask = { navController.navigate(Routes.ADD_EDIT_TASK) },
                 onOpenCourses = { navController.navigate(Routes.COURSES) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
@@ -35,9 +35,11 @@ fun AppNavGraph(
 
         composable(Routes.ADD_EDIT_TASK) {
             AddEditTaskScreen(
+                taskViewModel = taskViewModel,
                 onBack = { navController.popBackStack() }
             )
         }
+
 
         composable(Routes.COURSES) {
             CoursesScreen(

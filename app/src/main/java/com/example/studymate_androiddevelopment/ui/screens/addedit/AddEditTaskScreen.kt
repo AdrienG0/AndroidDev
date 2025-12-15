@@ -5,10 +5,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.studymate_androiddevelopment.viewmodel.TaskViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditTaskScreen(
+    taskViewModel: TaskViewModel,
     onBack: () -> Unit
 ) {
     val courses = listOf("Android", "Network", "Linux")
@@ -18,6 +20,8 @@ fun AddEditTaskScreen(
 
     var selectedCourse by remember { mutableStateOf(courses.first()) }
     var expanded by remember { mutableStateOf(false) }
+
+    var errorText by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
@@ -38,7 +42,10 @@ fun AddEditTaskScreen(
         ) {
             OutlinedTextField(
                 value = title,
-                onValueChange = { title = it },
+                onValueChange = {
+                    title = it
+                    errorText = null
+                },
                 label = { Text("Task title") },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -80,13 +87,34 @@ fun AddEditTaskScreen(
                 }
             }
 
+            if (errorText != null) {
+                Text(
+                    text = errorText!!,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+
             Button(
                 onClick = {
+                    val cleanTitle = title.trim()
+
+                    if (cleanTitle.isEmpty()) {
+                        errorText = "Title is required."
+                        return@Button
+                    }
+
+                    taskViewModel.addTask(
+                        title = cleanTitle,
+                        description = null,
+                        dueDate = null,
+                        courseId = null
+                    )
+
                     onBack()
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Save (visual)")
+                Text("Save")
             }
         }
     }
