@@ -7,6 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.studymate_androiddevelopment.viewmodel.CourseViewModel
 import com.example.studymate_androiddevelopment.viewmodel.TaskViewModel
+import com.example.studymate_androiddevelopment.ui.events.TasksEvent
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,12 +115,14 @@ fun AddEditTaskScreen(
                         return@Button
                     }
 
-                    taskViewModel.addTask(
-                        title = cleanTitle,
-                        description = null,
-                        dueDate = dueDateMillis,
-                        courseId = null,
-                        courseName = selectedCourse
+                    taskViewModel.onEvent(
+                        TasksEvent.AddTask(
+                            title = cleanTitle,
+                            description = null,
+                            dueDate = dueDateMillis,
+                            courseId = null,
+                            courseName = selectedCourse
+                        )
                     )
 
                     onBack()
@@ -127,6 +131,7 @@ fun AddEditTaskScreen(
             ) {
                 Text("Save")
             }
+
         }
     }
 }
