@@ -23,5 +23,6 @@ data class TaskEntity(
     val description: String? = null,
     val dueDate: Long? = null,
     val courseId: Long? = null,
+    val courseName: String? = null,
     val isDone: Boolean = false
 )
