@@ -21,7 +21,7 @@ object RiskCalculator {
 
         return when {
             daysLeft <= 2 -> RiskLevel.HIGH
-            daysLeft in 3..7 -> RiskLevel.MEDIUM
+            daysLeft >= 3 && daysLeft <= 7 -> RiskLevel.MEDIUM
             else -> RiskLevel.LOW
         }
     }
