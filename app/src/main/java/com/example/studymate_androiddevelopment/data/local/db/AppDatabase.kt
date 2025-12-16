@@ -9,7 +9,7 @@ import com.example.studymate_androiddevelopment.data.local.entity.TaskEntity
 
 @Database(
     entities = [CourseEntity::class, TaskEntity::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
