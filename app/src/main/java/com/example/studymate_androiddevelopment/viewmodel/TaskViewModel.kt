@@ -15,8 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.time.ZoneId
+import java.util.TimeZone
 
 class TaskViewModel(
     private val repository: StudyRepository
@@ -73,7 +72,7 @@ class TaskViewModel(
             repository.getTasks().collect { tasks ->
                 val finalList = applyAll(tasks, _uiState.value)
                 _uiState.update { it.copy(tasks = finalList) }
-                return@collect // stop after first emission
+                return@collect
             }
         }
     }
@@ -88,10 +87,10 @@ class TaskViewModel(
         viewModelScope.launch {
 
             val dueDateEpochDay: Long? = dueDate?.let { millis ->
-                Instant.ofEpochMilli(millis)
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDate()
-                    .toEpochDay()
+                val tz = TimeZone.getDefault()
+                val offset = tz.getOffset(millis)
+                val localMillis = millis + offset
+                Math.floorDiv(localMillis, 86_400_000L)
             }
 
             val task = TaskEntity(
@@ -105,6 +104,7 @@ class TaskViewModel(
             repository.addTask(task)
         }
     }
+
 
 
     private fun toggleDone(taskId: Long, newValue: Boolean) {
@@ -140,11 +140,14 @@ class TaskViewModel(
         }
     }
 
-    private fun applyRiskFilter(all: List<TaskEntity>, riskFilter: RiskFilter): List<TaskEntity> {
+    private fun applyRiskFilter(
+        all: List<TaskEntity>,
+        riskFilter: RiskFilter
+    ): List<TaskEntity> {
         if (riskFilter == RiskFilter.All) return all
 
         return all.filter { task ->
-            val risk = RiskCalculator.calculate(task.dueDate)
+            val risk = RiskCalculator.calculate(task.dueDateEpochDay)
             when (riskFilter) {
                 RiskFilter.High -> risk == RiskLevel.HIGH
                 RiskFilter.Medium -> risk == RiskLevel.MEDIUM
@@ -154,6 +157,7 @@ class TaskViewModel(
         }
     }
 
+
     private fun applySort(all: List<TaskEntity>, sortMode: SortMode): List<TaskEntity> {
         return when (sortMode) {
             SortMode.DueDateAsc -> {
@@ -162,7 +166,7 @@ class TaskViewModel(
 
             SortMode.RiskHighFirst -> {
                 all.sortedBy { task ->
-                    when (RiskCalculator.calculate(task.dueDate)) {
+                    when (RiskCalculator.calculate(task.dueDateEpochDay)) {
                         RiskLevel.HIGH -> 0
                         RiskLevel.MEDIUM -> 1
                         RiskLevel.LOW -> 2

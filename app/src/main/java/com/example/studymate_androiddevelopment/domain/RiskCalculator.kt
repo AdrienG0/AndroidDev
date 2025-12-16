@@ -13,8 +13,11 @@ object RiskCalculator {
      *
      * If dueDate is in the past -> HIGH (overdue)
      */
-    fun calculate(dueDate: LocalDate, today: LocalDate = LocalDate.now()): RiskLevel {
-        val daysLeft = ChronoUnit.DAYS.between(today, dueDate)
+    fun calculate(dueDateEpochDay: Long?): RiskLevel {
+        if (dueDateEpochDay == null) return RiskLevel.LOW
+
+        val todayEpochDay = System.currentTimeMillis() / 86_400_000L
+        val daysLeft = dueDateEpochDay - todayEpochDay
 
         return when {
             daysLeft <= 2 -> RiskLevel.HIGH
