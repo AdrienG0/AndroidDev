@@ -1,25 +1,23 @@
 package com.example.studymate_androiddevelopment.domain
 
-import com.example.studymate_androiddevelopment.data.local.entities.TaskEntity
-import java.time.LocalDate
+import com.example.studymate_androiddevelopment.data.local.entity.TaskEntity
 
 data class TaskUi(
-    val id: Int,
+    val id: Long,
     val title: String,
-    val courseName: String,
-    val dueDate: LocalDate,
+    val courseName: String?,
+    val dueDateEpochDay: Long?,
     val isDone: Boolean,
     val risk: RiskLevel
 )
 
 fun TaskEntity.toUi(): TaskUi {
-    val date = LocalDate.ofEpochDay(dueDateEpochDay)
     return TaskUi(
         id = id,
         title = title,
         courseName = courseName,
-        dueDate = date,
+        dueDateEpochDay = dueDateEpochDay,
         isDone = isDone,
-        risk = RiskCalculator.calculate(date)
+        risk = RiskCalculator.calculate(dueDateEpochDay)
     )
 }

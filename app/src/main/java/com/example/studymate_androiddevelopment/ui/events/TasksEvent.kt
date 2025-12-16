@@ -2,6 +2,8 @@ package com.example.studymate_androiddevelopment.ui.events
 
 import com.example.studymate_androiddevelopment.data.local.entity.TaskEntity
 import com.example.studymate_androiddevelopment.ui.state.TaskFilter
+import com.example.studymate_androiddevelopment.ui.state.RiskFilter
+import com.example.studymate_androiddevelopment.ui.state.SortMode
 
 sealed class TasksEvent {
     data class AddTask(
