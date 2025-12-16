@@ -16,4 +16,7 @@ sealed class TasksEvent {
     data class DeleteTask(val taskId: Long) : TasksEvent()
     data class UpdateTask(val task: TaskEntity) : TasksEvent()
     data class ChangeFilter(val filter: TaskFilter) : TasksEvent()
+
+    data class ChangeRiskFilter(val riskFilter: RiskFilter) : TasksEvent()
+    data class ChangeSortMode(val sortMode: SortMode) : TasksEvent()
 }

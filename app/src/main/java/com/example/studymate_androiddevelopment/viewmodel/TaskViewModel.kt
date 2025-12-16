@@ -4,13 +4,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.studymate_androiddevelopment.data.local.entity.TaskEntity
 import com.example.studymate_androiddevelopment.data.repository.StudyRepository
+import com.example.studymate_androiddevelopment.domain.RiskCalculator
+import com.example.studymate_androiddevelopment.domain.RiskLevel
 import com.example.studymate_androiddevelopment.ui.events.TasksEvent
+import com.example.studymate_androiddevelopment.ui.state.RiskFilter
+import com.example.studymate_androiddevelopment.ui.state.SortMode
 import com.example.studymate_androiddevelopment.ui.state.TaskFilter
 import com.example.studymate_androiddevelopment.ui.state.TasksUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.ZoneId
 
 class TaskViewModel(
     private val repository: StudyRepository
@@ -22,45 +28,84 @@ class TaskViewModel(
     init {
         viewModelScope.launch {
             repository.getTasks().collect { allTasks ->
-                val filtered = applyFilter(allTasks, _uiState.value.filter)
-                _uiState.update { it.copy(tasks = filtered) }
+                val finalList = applyAll(allTasks, _uiState.value)
+                _uiState.update { it.copy(tasks = finalList) }
             }
         }
     }
 
     fun onEvent(event: TasksEvent) {
         when (event) {
-            is TasksEvent.AddTask -> addTask(event.title, event.description, event.dueDate, event.courseId, event.courseName)
+
+            is TasksEvent.AddTask -> addTask(
+                event.title,
+                event.description,
+                event.dueDate,
+                event.courseId,
+                event.courseName
+            )
+
             is TasksEvent.ToggleDone -> toggleDone(event.taskId, event.newValue)
+
             is TasksEvent.DeleteTask -> deleteTask(event.taskId)
+
             is TasksEvent.UpdateTask -> updateTask(event.task)
+
             is TasksEvent.ChangeFilter -> {
                 _uiState.update { it.copy(filter = event.filter) }
-                // re-filter using current displayed list? better: pull from repo again
-                viewModelScope.launch {
-                    val all = repository.getTasks() // Flow
-                    all.collect { tasks ->
-                        val filtered = applyFilter(tasks, event.filter)
-                        _uiState.update { it.copy(tasks = filtered) }
-                        return@collect // stop after 1 emission
-                    }
-                }
+                refreshOnce()
+            }
+
+            is TasksEvent.ChangeRiskFilter -> {
+                _uiState.update { it.copy(riskFilter = event.riskFilter) }
+                refreshOnce()
+            }
+
+            is TasksEvent.ChangeSortMode -> {
+                _uiState.update { it.copy(sortMode = event.sortMode) }
+                refreshOnce()
             }
         }
     }
 
-    private fun addTask(title: String, description: String?, dueDate: Long?, courseId: Long?, courseName: String?) {
+    private fun refreshOnce() {
         viewModelScope.launch {
+            repository.getTasks().collect { tasks ->
+                val finalList = applyAll(tasks, _uiState.value)
+                _uiState.update { it.copy(tasks = finalList) }
+                return@collect // stop after first emission
+            }
+        }
+    }
+
+    private fun addTask(
+        title: String,
+        description: String?,
+        dueDate: Long?,
+        courseId: Long?,
+        courseName: String?
+    ) {
+        viewModelScope.launch {
+
+            val dueDateEpochDay: Long? = dueDate?.let { millis ->
+                Instant.ofEpochMilli(millis)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate()
+                    .toEpochDay()
+            }
+
             val task = TaskEntity(
                 title = title,
                 description = description,
-                dueDate = dueDate,
+                dueDateEpochDay = dueDateEpochDay,
                 courseId = courseId,
                 courseName = courseName
             )
+
             repository.addTask(task)
         }
     }
+
 
     private fun toggleDone(taskId: Long, newValue: Boolean) {
         viewModelScope.launch {
@@ -80,12 +125,50 @@ class TaskViewModel(
         }
     }
 
-    private fun applyFilter(all: List<TaskEntity>, filter: TaskFilter): List<TaskEntity> {
+    private fun applyAll(all: List<TaskEntity>, state: TasksUiState): List<TaskEntity> {
+        val afterMainFilter = applyMainFilter(all, state.filter)
+        val afterRiskFilter = applyRiskFilter(afterMainFilter, state.riskFilter)
+        return applySort(afterRiskFilter, state.sortMode)
+    }
+
+    private fun applyMainFilter(all: List<TaskEntity>, filter: TaskFilter): List<TaskEntity> {
         return when (filter) {
             TaskFilter.All -> all
             TaskFilter.Completed -> all.filter { it.isDone }
             TaskFilter.NotCompleted -> all.filter { !it.isDone }
             is TaskFilter.ByCourse -> all.filter { it.courseId == filter.courseId }
+        }
+    }
+
+    private fun applyRiskFilter(all: List<TaskEntity>, riskFilter: RiskFilter): List<TaskEntity> {
+        if (riskFilter == RiskFilter.All) return all
+
+        return all.filter { task ->
+            val risk = RiskCalculator.calculate(task.dueDate)
+            when (riskFilter) {
+                RiskFilter.High -> risk == RiskLevel.HIGH
+                RiskFilter.Medium -> risk == RiskLevel.MEDIUM
+                RiskFilter.Low -> risk == RiskLevel.LOW
+                RiskFilter.All -> true
+            }
+        }
+    }
+
+    private fun applySort(all: List<TaskEntity>, sortMode: SortMode): List<TaskEntity> {
+        return when (sortMode) {
+            SortMode.DueDateAsc -> {
+                all.sortedWith(compareBy<TaskEntity> { it.dueDate == null }.thenBy { it.dueDate ?: Long.MAX_VALUE })
+            }
+
+            SortMode.RiskHighFirst -> {
+                all.sortedBy { task ->
+                    when (RiskCalculator.calculate(task.dueDate)) {
+                        RiskLevel.HIGH -> 0
+                        RiskLevel.MEDIUM -> 1
+                        RiskLevel.LOW -> 2
+                    }
+                }
+            }
         }
     }
 }
