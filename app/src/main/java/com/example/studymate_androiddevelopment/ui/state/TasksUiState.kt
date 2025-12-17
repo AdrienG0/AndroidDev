@@ -7,5 +7,8 @@ data class TasksUiState(
     val filter: TaskFilter = TaskFilter.All,
 
     val riskFilter: RiskFilter = RiskFilter.All,
-    val sortMode: SortMode = SortMode.DueDateAsc
+    val sortMode: SortMode = SortMode.DueDateAsc,
+
+    val errorMessage: String? = null
+
 )

@@ -67,6 +67,14 @@ class TaskViewModel(
         }
     }
 
+    private fun setError(message: String) {
+        _uiState.update { it.copy(errorMessage = message) }
+    }
+
+    private fun clearError() {
+        _uiState.update { it.copy(errorMessage = null) }
+    }
+
     private fun refreshOnce() {
         viewModelScope.launch {
             repository.getTasks().collect { tasks ->
