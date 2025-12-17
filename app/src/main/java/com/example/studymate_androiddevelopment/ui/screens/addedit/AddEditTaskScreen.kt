@@ -39,8 +39,9 @@ fun AddEditTaskScreen(
 
     var selectedCourse by remember { mutableStateOf<String?>(null) }
     var expanded by remember { mutableStateOf(false) }
+    val selectedCourseEntity = courseEntities.firstOrNull { it.name == selectedCourse }
+    val selectedCourseId = selectedCourseEntity?.id
 
-    var errorText by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(taskToEdit) {
         if (taskToEdit != null) {
@@ -83,7 +84,7 @@ fun AddEditTaskScreen(
                 value = title,
                 onValueChange = {
                     title = it
-                    errorText = null
+                    taskViewModel.onEvent(TasksEvent.ChangeFilter(tasksState.filter))
                 },
                 label = { Text("Task title") },
                 modifier = Modifier.fillMaxWidth()
@@ -126,9 +127,9 @@ fun AddEditTaskScreen(
                 }
             }
 
-            if (errorText != null) {
+            tasksState.errorMessage?.let { msg ->
                 Text(
-                    text = errorText!!,
+                    text = msg,
                     color = MaterialTheme.colorScheme.error
                 )
             }
@@ -138,20 +139,14 @@ fun AddEditTaskScreen(
                     val cleanTitle = title.trim()
                     val dueDateMillis = parseDateToMillis(deadline)
 
-                    if (cleanTitle.isEmpty()) {
-                        errorText = "Title is required."
-                        return@Button
-                    }
-
                     if (taskToEdit == null) {
-                        // ✅ ADD MODE
                         taskViewModel.onEvent(
                             TasksEvent.AddTask(
                                 title = cleanTitle,
                                 description = null,
                                 dueDate = dueDateMillis,
-                                courseId = null,
-                                courseName = selectedCourse
+                                courseId = selectedCourseId,
+                                courseName = selectedCourseEntity?.name
                             )
                         )
                     } else {
