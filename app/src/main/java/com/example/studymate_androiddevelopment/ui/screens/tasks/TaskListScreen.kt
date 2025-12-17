@@ -71,36 +71,28 @@ fun TaskListScreen(
                         DropdownMenuItem(
                             text = { Text("All") },
                             onClick = {
-                                taskViewModel.onEvent(
-                                    TasksEvent.ChangeRiskFilter(RiskFilter.All)
-                                )
+                                taskViewModel.onEvent(TasksEvent.ChangeRiskFilter(RiskFilter.All))
                                 menuExpanded = false
                             }
                         )
                         DropdownMenuItem(
                             text = { Text("High") },
                             onClick = {
-                                taskViewModel.onEvent(
-                                    TasksEvent.ChangeRiskFilter(RiskFilter.High)
-                                )
+                                taskViewModel.onEvent(TasksEvent.ChangeRiskFilter(RiskFilter.High))
                                 menuExpanded = false
                             }
                         )
                         DropdownMenuItem(
                             text = { Text("Medium") },
                             onClick = {
-                                taskViewModel.onEvent(
-                                    TasksEvent.ChangeRiskFilter(RiskFilter.Medium)
-                                )
+                                taskViewModel.onEvent(TasksEvent.ChangeRiskFilter(RiskFilter.Medium))
                                 menuExpanded = false
                             }
                         )
                         DropdownMenuItem(
                             text = { Text("Low") },
                             onClick = {
-                                taskViewModel.onEvent(
-                                    TasksEvent.ChangeRiskFilter(RiskFilter.Low)
-                                )
+                                taskViewModel.onEvent(TasksEvent.ChangeRiskFilter(RiskFilter.Low))
                                 menuExpanded = false
                             }
                         )
@@ -116,18 +108,14 @@ fun TaskListScreen(
                         DropdownMenuItem(
                             text = { Text("By due date") },
                             onClick = {
-                                taskViewModel.onEvent(
-                                    TasksEvent.ChangeSortMode(SortMode.DueDateAsc)
-                                )
+                                taskViewModel.onEvent(TasksEvent.ChangeSortMode(SortMode.DueDateAsc))
                                 menuExpanded = false
                             }
                         )
                         DropdownMenuItem(
                             text = { Text("Risk (High first)") },
                             onClick = {
-                                taskViewModel.onEvent(
-                                    TasksEvent.ChangeSortMode(SortMode.RiskHighFirst)
-                                )
+                                taskViewModel.onEvent(TasksEvent.ChangeSortMode(SortMode.RiskHighFirst))
                                 menuExpanded = false
                             }
                         )
@@ -142,6 +130,7 @@ fun TaskListScreen(
         }
     ) { padding ->
 
+        // --- FASE 8: EMPTY STATE ---
         if (uiState.tasks.isEmpty()) {
             Box(
                 modifier = Modifier
@@ -149,7 +138,11 @@ fun TaskListScreen(
                     .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
-                Text("No tasks yet. Tap + to add one.")
+                Text(
+                    text = "No tasks yet. Tap + to add one.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         } else {
             LazyColumn(
@@ -181,7 +174,7 @@ fun TaskListScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    task.title,
+                                    text = task.title,
                                     style = MaterialTheme.typography.titleMedium,
                                     modifier = Modifier.weight(1f)
                                 )
