@@ -1,5 +1,8 @@
 package com.example.studymate_androiddevelopment.ui.screens.addedit
 
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,7 +50,6 @@ fun AddEditTaskScreen(
     val selectedCourseEntity = courseEntities.firstOrNull { it.name == selectedCourse }
     val selectedCourseId = selectedCourseEntity?.id
 
-    /* ---------- NAVIGATIE BIJ SUCCES ---------- */
     LaunchedEffect(tasksState.taskSaved) {
         if (tasksState.taskSaved) {
             taskViewModel.consumeTaskSaved()
@@ -92,7 +94,11 @@ fun AddEditTaskScreen(
                 value = title,
                 onValueChange = { title = it },
                 label = { Text("Task title") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Done
+                )
             )
 
             OutlinedTextField(
