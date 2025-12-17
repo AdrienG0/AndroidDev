@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.studymate_androiddevelopment.domain.RiskLevel
 import com.example.studymate_androiddevelopment.domain.RiskCalculator
 import com.example.studymate_androiddevelopment.ui.components.RiskChip
 import com.example.studymate_androiddevelopment.ui.events.TasksEvent
@@ -75,6 +76,15 @@ fun TaskListScreen(
                                 menuExpanded = false
                             }
                         )
+
+                        DropdownMenuItem(
+                            text = { Text("Overdue") },
+                            onClick = {
+                                taskViewModel.onEvent(TasksEvent.ChangeRiskFilter(RiskFilter.Overdue))
+                                menuExpanded = false
+                            }
+                        )
+
                         DropdownMenuItem(
                             text = { Text("High") },
                             onClick = {
@@ -89,6 +99,7 @@ fun TaskListScreen(
                                 menuExpanded = false
                             }
                         )
+
                         DropdownMenuItem(
                             text = { Text("Low") },
                             onClick = {
@@ -130,7 +141,6 @@ fun TaskListScreen(
         }
     ) { padding ->
 
-        // --- FASE 8: EMPTY STATE ---
         if (uiState.tasks.isEmpty()) {
             Box(
                 modifier = Modifier
@@ -196,6 +206,14 @@ fun TaskListScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                             RiskChip(risk = risk)
 
+                            if (risk == RiskLevel.OVERDUE) {
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = "Deadline passed",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
                             Spacer(modifier = Modifier.height(12.dp))
                             Button(
                                 onClick = {

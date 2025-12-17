@@ -192,6 +192,7 @@ class TaskViewModel(
 
         return all.filter { task ->
             when (riskFilter) {
+                RiskFilter.Overdue -> RiskCalculator.calculate(task.dueDateEpochDay) == RiskLevel.OVERDUE
                 RiskFilter.High -> RiskCalculator.calculate(task.dueDateEpochDay) == RiskLevel.HIGH
                 RiskFilter.Medium -> RiskCalculator.calculate(task.dueDateEpochDay) == RiskLevel.MEDIUM
                 RiskFilter.Low -> RiskCalculator.calculate(task.dueDateEpochDay) == RiskLevel.LOW
@@ -211,9 +212,10 @@ class TaskViewModel(
             SortMode.RiskHighFirst ->
                 all.sortedBy {
                     when (RiskCalculator.calculate(it.dueDateEpochDay)) {
-                        RiskLevel.HIGH -> 0
-                        RiskLevel.MEDIUM -> 1
-                        RiskLevel.LOW -> 2
+                        RiskLevel.OVERDUE -> 0
+                        RiskLevel.HIGH -> 1
+                        RiskLevel.MEDIUM -> 2
+                        RiskLevel.LOW -> 3
                     }
                 }
         }
