@@ -92,9 +92,29 @@ class TaskViewModel(
         courseId: Long?,
         courseName: String?
     ) {
-        viewModelScope.launch {
+        val cleanTitle = title.trim()
+        val cleanCourseName = courseName?.trim()
 
-            val dueDateEpochDay: Long? = dueDate?.let { millis ->
+        when {
+            cleanTitle.isBlank() -> {
+                setError("Title is required.")
+                return
+            }
+            dueDate == null -> {
+                setError("Deadline is required.")
+                return
+            }
+            courseId == null || cleanCourseName.isNullOrBlank() -> {
+                setError("Course is required.")
+                return
+            }
+            else -> {
+                clearError()
+            }
+        }
+
+        viewModelScope.launch {
+            val dueDateEpochDay: Long? = dueDate.let { millis ->
                 val tz = TimeZone.getDefault()
                 val offset = tz.getOffset(millis)
                 val localMillis = millis + offset
@@ -102,16 +122,17 @@ class TaskViewModel(
             }
 
             val task = TaskEntity(
-                title = title,
+                title = cleanTitle,
                 description = description,
                 dueDateEpochDay = dueDateEpochDay,
                 courseId = courseId,
-                courseName = courseName
+                courseName = cleanCourseName
             )
 
             repository.addTask(task)
         }
     }
+
 
 
 
