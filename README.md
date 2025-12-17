@@ -1,29 +1,29 @@
 # 📚 StudyMate – Android Development Project
 
-StudyMate is een Android-applicatie ontwikkeld met **Jetpack Compose** die studenten helpt om hun studietaken te beheren op een overzichtelijke en slimme manier.  
-De app focust niet alleen op takenlijsten, maar biedt ook een **unieke visuele ondersteuning** om deadlines beter in te schatten.
+StudyMate is an Android application developed with **Jetpack Compose** that helps students manage their study tasks in a clear, structured, and intelligent way.  
+Instead of being a simple to-do list, the app provides **visual feedback** to help students better understand deadlines and urgency.
 
 ---
 
-## 🎯 Doel van de applicatie
+## 🎯 Goal of the Application
 
-Het doel van StudyMate is om studenten te helpen:
-- hun taken per vak te organiseren
-- deadlines niet te vergeten
-- prioriteiten te stellen op basis van urgentie
-- overzicht te bewaren tijdens drukke periodes zoals examens en projecten
+The goal of StudyMate is to help students:
+- organize tasks per course
+- avoid missing deadlines
+- set priorities based on urgency
+- keep an overview during busy periods such as exams and projects
 
 ---
 
-## 🚀 Belangrijkste functionaliteiten
+## 🚀 Main Features
 
-- Taken aanmaken, bewerken en verwijderen
-- Taken koppelen aan een course
-- Deadline instellen per taak
-- Taken aanduiden als voltooid
-- Lokale opslag via **Room Database**
-- Moderne UI met **Jetpack Compose (Material 3)**
-- State management via **MVVM + ViewModel**
+- Create, edit, and delete tasks
+- Link tasks to a course
+- Set a deadline per task
+- Mark tasks as completed
+- Local data storage using **Room Database**
+- Modern UI built with **Jetpack Compose (Material 3)**
+- State management using **MVVM + ViewModel**
 
 ---
 
@@ -31,48 +31,58 @@ Het doel van StudyMate is om studenten te helpen:
 
 ### Smart Deadline Risk System
 
-Elke taak krijgt **automatisch een risiconiveau** op basis van de ingestelde deadline.  
-Dit helpt studenten om snel te zien welke taken dringend zijn.
+Each task automatically receives a **risk level** based on its deadline.  
+This allows students to immediately see which tasks require attention and which deadlines have already been missed.
 
-### Risicoregels
-- **HIGH** → deadline binnen 0–2 dagen of in het verleden
-- **MEDIUM** → deadline binnen 3–7 dagen
-- **LOW** → deadline over meer dan 7 dagen of geen deadline
+### Risk Rules
 
-### Visualisatie
-- 🔴 **High risk** → rood
-- 🟠 **Medium risk** → oranje
-- 🟢 **Low risk** → groen
+- **OVERDUE** → deadline is in the past
+- **HIGH** → deadline within 0–2 days
+- **MEDIUM** → deadline within 3–7 days
+- **LOW** → deadline more than 7 days away
 
-Het risiconiveau wordt weergegeven via een **kleurgecodeerde chip** bij elke taak.
+This clear separation ensures that missed deadlines are not treated the same as urgent upcoming tasks.
 
----
+### Visual Feedback
 
-## 🔍 Filter & Sort
+- 🔴 **Overdue** → dark red
+- 🔴 **High risk** → red
+- 🟠 **Medium risk** → orange
+- 🟢 **Low risk** → green
 
-De gebruiker kan:
-- Taken **filteren op risico**:
-    - All
-    - High
-    - Medium
-    - Low
-- Taken **sorteren**:
-    - op deadline (oplopend)
-    - op risico (High → Low)
-
-Deze opties zijn beschikbaar via het menu rechtsboven in de applicatie.
+Each risk level is displayed using a **color-coded RiskChip** next to the task.
 
 ---
 
-## 🧱 Technische architectuur
+## 🔍 Filter & Sort Options
 
-- **Programmeertaal:** Kotlin
+Users can:
+
+### Filter tasks by risk:
+- All
+- Overdue
+- High
+- Medium
+- Low
+
+### Sort tasks by:
+- Deadline (ascending)
+- Risk level (Overdue → High → Medium → Low)
+
+These options are accessible via the menu in the top-right corner of the application.
+
+---
+
+## 🧱 Technical Architecture
+
+- **Programming language:** Kotlin
 - **UI:** Jetpack Compose + Material 3
-- **Architectuur:** MVVM
+- **Architecture pattern:** MVVM
 - **State management:** StateFlow
 - **Database:** Room (local storage)
 
-### Projectstructuur
+### Project Structure
+
 data/
 ├─ local/
 │ ├─ dao/
@@ -98,43 +108,45 @@ viewmodel/
 
 ## 🧮 Risk Calculation Logic
 
-De risicoberekening gebeurt centraal via `RiskCalculator`.
+The risk calculation is handled centrally by the `RiskCalculator`.
 
-- Deadlines worden opgeslagen als `epochDay`
-- Het verschil met de huidige dag bepaalt het risiconiveau
-- Deze logica wordt gebruikt voor:
-    - kleur van de RiskChip
-    - filteren op risico
-    - sorteren op risico
+- Deadlines are stored as `epochDay`
+- The difference between the current day and the deadline determines the risk level
+- The same logic is reused for:
+  - displaying the RiskChip color
+  - filtering tasks by risk
+  - sorting tasks by risk
 
----
-
-## 🧪 Wat kan getest worden in de applicatie
-
-- Een taak aanmaken met verschillende deadlines
-- Controleren of het risiconiveau automatisch verandert
-- Filteren op risico (High / Medium / Low)
-- Sorteren op deadline
-- Sorteren op risico (High eerst)
-- Taken afronden via checkbox
-- Taken verwijderen
+This ensures consistent behavior across the entire application.
 
 ---
 
-## 👨‍🎓 Auteur
+## 🧪 What Can Be Tested in the App
 
-- **Naam:** Adrien Goksel
-- **Opleiding:** IT – Android Development
-- **School:** Erasmushogeschool Brussel
+- Creating tasks with different deadlines
+- Verifying that the risk level updates automatically
+- Filtering tasks by risk (Overdue / High / Medium / Low)
+- Sorting tasks by deadline
+- Sorting tasks by risk (Overdue first)
+- Marking tasks as completed
+- Deleting tasks
 
 ---
 
-## ✅ Conclusie
+## 👨‍🎓 Author
 
-StudyMate gaat verder dan een klassieke to-do applicatie door:
-- automatisch risico’s te berekenen
-- duidelijke visuele feedback te geven via kleuren
-- studenten te helpen prioriteiten te stellen
+- **Name:** Adrien Göksel
+- **Program:** IT – Android Development
+- **Institution:** Erasmushogeschool Brussel
 
-De applicatie combineert **gebruiksvriendelijkheid**, **moderne Android-technologie** en een **duidelijke USP**.
+---
 
+## ✅ Conclusion
+
+StudyMate goes beyond a traditional to-do application by:
+- automatically calculating task urgency
+- clearly separating overdue tasks from urgent ones
+- providing immediate visual feedback using colors
+- helping students reflect on planning and prioritization
+
+The application combines **usability**, **modern Android technologies**, and a **clear functional USP**.
