@@ -19,6 +19,7 @@ sealed class TasksEvent {
     data class UpdateTask(val task: TaskEntity) : TasksEvent()
     data class ChangeFilter(val filter: TaskFilter) : TasksEvent()
 
+    data class ToggleFocusMode(val enabled: Boolean) : TasksEvent()
     data class ChangeRiskFilter(val riskFilter: RiskFilter) : TasksEvent()
     data class ChangeSortMode(val sortMode: SortMode) : TasksEvent()
 }

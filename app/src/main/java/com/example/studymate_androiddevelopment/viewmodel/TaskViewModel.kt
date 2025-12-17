@@ -61,6 +61,10 @@ class TaskViewModel(
                 _uiState.update { it.copy(sortMode = event.sortMode) }
                 refreshOnce()
             }
+            is TasksEvent.ToggleFocusMode -> {
+                _uiState.update { it.copy(isFocusModeEnabled = event.enabled) }
+                refreshOnce()
+            }
         }
     }
 
@@ -172,7 +176,8 @@ class TaskViewModel(
 
     private fun applyAll(all: List<TaskEntity>, state: TasksUiState): List<TaskEntity> {
         val afterMainFilter = applyMainFilter(all, state.filter)
-        val afterRiskFilter = applyRiskFilter(afterMainFilter, state.riskFilter)
+        val afterFocusMode = applyFocusMode(afterMainFilter, state.isFocusModeEnabled)
+        val afterRiskFilter = applyRiskFilter(afterFocusMode, state.riskFilter)
         return applySort(afterRiskFilter, state.sortMode)
     }
 
@@ -197,6 +202,17 @@ class TaskViewModel(
                 RiskFilter.Medium -> RiskCalculator.calculate(task.dueDateEpochDay) == RiskLevel.MEDIUM
                 RiskFilter.Low -> RiskCalculator.calculate(task.dueDateEpochDay) == RiskLevel.LOW
                 RiskFilter.All -> true
+            }
+        }
+    }
+
+    private fun applyFocusMode(all: List<TaskEntity>, enabled: Boolean): List<TaskEntity> {
+        if (!enabled) return all
+
+        return all.filter { task ->
+            when (RiskCalculator.calculate(task.dueDateEpochDay)) {
+                RiskLevel.OVERDUE, RiskLevel.HIGH, RiskLevel.MEDIUM -> true
+                RiskLevel.LOW -> false
             }
         }
     }

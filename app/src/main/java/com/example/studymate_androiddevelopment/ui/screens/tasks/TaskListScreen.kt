@@ -63,6 +63,38 @@ fun TaskListScreen(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false }
                     ) {
+
+                        Text(
+                            "Focus mode",
+                            modifier = Modifier.padding(8.dp),
+                            style = MaterialTheme.typography.labelMedium
+                        )
+
+                        DropdownMenuItem(
+                            text = {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Show only urgent tasks",
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Switch(
+                                        checked = uiState.isFocusModeEnabled,
+                                        onCheckedChange = { checked ->
+                                            taskViewModel.onEvent(
+                                                TasksEvent.ToggleFocusMode(checked)
+                                            )
+                                        }
+                                    )
+                                }
+                            },
+                            onClick = { }
+                        )
+
+                        HorizontalDivider()
+
                         Text(
                             "Filter by risk",
                             modifier = Modifier.padding(8.dp),

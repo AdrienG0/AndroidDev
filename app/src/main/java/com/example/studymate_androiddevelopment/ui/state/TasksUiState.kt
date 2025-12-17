@@ -9,5 +9,6 @@ data class TasksUiState(
     val sortMode: SortMode = SortMode.DueDateAsc,
 
     val errorMessage: String? = null,
+    val isFocusModeEnabled: Boolean = false,
     val taskSaved: Boolean = false
 )
