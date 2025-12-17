@@ -1,6 +1,10 @@
 package com.example.studymate_androiddevelopment.ui.screens.addedit
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -13,7 +17,9 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
-private fun formatMillisToDate(millis: Long): String {
+
+private fun formatEpochDayToInput(epochDay: Long): String {
+    val millis = epochDay * 86_400_000L
     val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     sdf.timeZone = TimeZone.getDefault()
     return sdf.format(Date(millis))
@@ -39,27 +45,21 @@ fun AddEditTaskScreen(
 
     var selectedCourse by remember { mutableStateOf<String?>(null) }
     var expanded by remember { mutableStateOf(false) }
+
     val selectedCourseEntity = courseEntities.firstOrNull { it.name == selectedCourse }
     val selectedCourseId = selectedCourseEntity?.id
 
-
-    LaunchedEffect(taskToEdit) {
+        LaunchedEffect(taskToEdit) {
         if (taskToEdit != null) {
             title = taskToEdit.title
-            deadline = taskToEdit.dueDate?.let { formatMillisToDate(it) } ?: ""
+            deadline = taskToEdit.dueDateEpochDay?.let { formatEpochDayToInput(it) } ?: ""
             selectedCourse = taskToEdit.courseName
         }
     }
 
     LaunchedEffect(courseEntities, taskToEdit) {
-        if (taskToEdit == null) {
-            if (selectedCourse == null && courseEntities.isNotEmpty()) {
-                selectedCourse = courseEntities.first().name
-            }
-        } else {
-            if (selectedCourse == null && courseEntities.isNotEmpty()) {
-                selectedCourse = courseEntities.first().name
-            }
+        if (taskToEdit == null && selectedCourse == null && courseEntities.isNotEmpty()) {
+            selectedCourse = courseEntities.first().name
         }
     }
 
@@ -67,9 +67,7 @@ fun AddEditTaskScreen(
         topBar = {
             TopAppBar(
                 title = { Text(if (taskToEdit == null) "Add Task" else "Edit Task") },
-                navigationIcon = {
-                    TextButton(onClick = onBack) { Text("Back") }
-                }
+                navigationIcon = { TextButton(onClick = onBack) { Text("Back") } }
             )
         }
     ) { padding ->
@@ -82,10 +80,7 @@ fun AddEditTaskScreen(
         ) {
             OutlinedTextField(
                 value = title,
-                onValueChange = {
-                    title = it
-                    taskViewModel.onEvent(TasksEvent.ChangeFilter(tasksState.filter))
-                },
+                onValueChange = { title = it },
                 label = { Text("Task title") },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -140,6 +135,7 @@ fun AddEditTaskScreen(
                     val dueDateMillis = parseDateToMillis(deadline)
 
                     if (taskToEdit == null) {
+
                         taskViewModel.onEvent(
                             TasksEvent.AddTask(
                                 title = cleanTitle,
@@ -152,22 +148,36 @@ fun AddEditTaskScreen(
                     } else {
                         val updatedTask = taskToEdit.copy(
                             title = cleanTitle,
-                            description = taskToEdit.description, // keep existing
-                            dueDate = dueDateMillis,
-                            courseId = null,
-                            courseName = selectedCourse
+                            description = taskToEdit.description,
+                            dueDateEpochDay = dueDateMillis?.let { millis ->
+                                // zelfde conversie als ViewModel gebruikt (millis -> epochDay)
+                                val tz = TimeZone.getDefault()
+                                val offset = tz.getOffset(millis)
+                                val localMillis = millis + offset
+                                Math.floorDiv(localMillis, 86_400_000L)
+                            },
+                            courseId = selectedCourseId,
+                            courseName = selectedCourseEntity?.name
                         )
 
-                        taskViewModel.onEvent(
-                            TasksEvent.UpdateTask(updatedTask)
-                        )
+                        taskViewModel.onEvent(TasksEvent.UpdateTask(updatedTask))
                     }
 
-                    onBack()
+                    if (tasksState.errorMessage == null) {
+                        onBack()
+                    }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = courseEntities.isNotEmpty()
             ) {
                 Text(if (taskToEdit == null) "Save" else "Update")
+            }
+
+            if (courseEntities.isEmpty()) {
+                Text(
+                    text = "Create a course first.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
