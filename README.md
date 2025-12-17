@@ -1,7 +1,7 @@
 # 📚 StudyMate – Android Development Project
 
 StudyMate is an Android application developed with **Jetpack Compose** that helps students manage their study tasks in a clear, structured, and intelligent way.  
-Instead of being a simple to-do list, the app provides **visual feedback** to help students better understand deadlines and urgency.
+Instead of being a simple to-do list, the app provides **visual and contextual feedback** to help students better understand deadlines, urgency, and focus.
 
 ---
 
@@ -12,6 +12,7 @@ The goal of StudyMate is to help students:
 - avoid missing deadlines
 - set priorities based on urgency
 - keep an overview during busy periods such as exams and projects
+- focus on what truly matters at a given moment
 
 ---
 
@@ -27,15 +28,14 @@ The goal of StudyMate is to help students:
 
 ---
 
-## 🌟 Unique Selling Point (USP)
+## 🌟 Unique Selling Points (USP)
 
-### Smart Deadline Risk System
+### 1. Smart Deadline Risk System
 
 Each task automatically receives a **risk level** based on its deadline.  
 This allows students to immediately see which tasks require attention and which deadlines have already been missed.
 
-### Risk Rules
-
+#### Risk Rules
 - **OVERDUE** → deadline is in the past
 - **HIGH** → deadline within 0–2 days
 - **MEDIUM** → deadline within 3–7 days
@@ -43,14 +43,28 @@ This allows students to immediately see which tasks require attention and which 
 
 This clear separation ensures that missed deadlines are not treated the same as urgent upcoming tasks.
 
-### Visual Feedback
-
+#### Visual Feedback
 - 🔴 **Overdue** → dark red
 - 🔴 **High risk** → red
 - 🟠 **Medium risk** → orange
 - 🟢 **Low risk** → green
 
 Each risk level is displayed using a **color-coded RiskChip** next to the task.
+
+---
+
+### 2. Smart Focus Mode
+
+StudyMate includes a **Smart Focus Mode** that helps students reduce cognitive overload and distractions.
+
+When Focus Mode is enabled:
+- only tasks with **OVERDUE**, **HIGH**, or **MEDIUM** risk levels are shown
+- low-priority tasks are temporarily hidden
+- the user can fully concentrate on urgent and important work
+
+This feature allows students to focus on what truly matters **right now**, without removing or deleting any tasks.
+
+Focus Mode can be enabled or disabled at any time via the menu in the top-right corner of the application.
 
 ---
 
@@ -128,8 +142,15 @@ This ensures consistent behavior across the entire application.
 - Filtering tasks by risk (Overdue / High / Medium / Low)
 - Sorting tasks by deadline
 - Sorting tasks by risk (Overdue first)
+- Enabling and disabling Smart Focus Mode
 - Marking tasks as completed
 - Deleting tasks
+
+---
+
+## 📦 APK
+
+The built APK of the application can be found in the `/apk` folder of this repository.
 
 ---
 
@@ -147,6 +168,7 @@ StudyMate goes beyond a traditional to-do application by:
 - automatically calculating task urgency
 - clearly separating overdue tasks from urgent ones
 - providing immediate visual feedback using colors
+- offering a Smart Focus Mode to reduce distractions
 - helping students reflect on planning and prioritization
 
-The application combines **usability**, **modern Android technologies**, and a **clear functional USP**.
+The application combines **usability**, **modern Android technologies**, and **multiple clear functional USPs**.
