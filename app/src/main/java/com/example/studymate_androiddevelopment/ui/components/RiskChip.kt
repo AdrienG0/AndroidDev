@@ -2,7 +2,6 @@ package com.example.studymate_androiddevelopment.ui.components
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,11 +21,8 @@ fun RiskChip(
     }
 
     AssistChip(
-        onClick = { /* no action needed */ },
-        label = { Text(label) },
-        modifier = modifier.padding(start = 8.dp),
-        colors = AssistChipDefaults.assistChipColors(
-            labelColor = MaterialTheme.colorScheme.onSurface
-        )
+        onClick = {},
+        label = { Text("Risk: $label") },
+        modifier = modifier.padding(top = 4.dp)
     )
 }

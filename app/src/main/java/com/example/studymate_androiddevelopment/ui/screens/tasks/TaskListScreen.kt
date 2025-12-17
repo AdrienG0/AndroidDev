@@ -7,33 +7,28 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.studymate_androiddevelopment.domain.RiskCalculator
+import com.example.studymate_androiddevelopment.ui.components.RiskChip
 import com.example.studymate_androiddevelopment.ui.events.TasksEvent
+import com.example.studymate_androiddevelopment.ui.state.RiskFilter
+import com.example.studymate_androiddevelopment.ui.state.SortMode
 import com.example.studymate_androiddevelopment.viewmodel.TaskViewModel
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
+import java.util.*
 
-private fun formatMillisToDate(millis: Long): String {
-    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+private fun formatEpochDay(epochDay: Long): String {
+    val millis = epochDay * 86_400_000L
+    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     sdf.timeZone = TimeZone.getDefault()
     return sdf.format(Date(millis))
 }
-
-data class UiTask(
-    val id: Long,
-    val title: String,
-    val courseName: String,
-    val deadlineText: String,
-    val riskLabel: String,
-    val isDone: Boolean
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,19 +40,7 @@ fun TaskListScreen(
     onEditTask: (Long) -> Unit
 ) {
     val uiState by taskViewModel.uiState.collectAsState()
-
-    val tasks = remember(uiState.tasks) {
-        uiState.tasks.map { t ->
-            UiTask(
-                id = t.id,
-                title = t.title,
-                courseName = t.courseName ?: "No course",
-                deadlineText = t.dueDate?.let { formatMillisToDate(it) } ?: "No deadline",
-                riskLabel = "Medium",
-                isDone = t.isDone
-            )
-        }
-    }
+    var menuExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -70,6 +53,85 @@ fun TaskListScreen(
                     IconButton(onClick = onOpenSettings) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")
                     }
+
+                    IconButton(onClick = { menuExpanded = true }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "Menu")
+                    }
+
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false }
+                    ) {
+                        Text(
+                            "Filter by risk",
+                            modifier = Modifier.padding(8.dp),
+                            style = MaterialTheme.typography.labelMedium
+                        )
+
+                        DropdownMenuItem(
+                            text = { Text("All") },
+                            onClick = {
+                                taskViewModel.onEvent(
+                                    TasksEvent.ChangeRiskFilter(RiskFilter.All)
+                                )
+                                menuExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("High") },
+                            onClick = {
+                                taskViewModel.onEvent(
+                                    TasksEvent.ChangeRiskFilter(RiskFilter.High)
+                                )
+                                menuExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Medium") },
+                            onClick = {
+                                taskViewModel.onEvent(
+                                    TasksEvent.ChangeRiskFilter(RiskFilter.Medium)
+                                )
+                                menuExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Low") },
+                            onClick = {
+                                taskViewModel.onEvent(
+                                    TasksEvent.ChangeRiskFilter(RiskFilter.Low)
+                                )
+                                menuExpanded = false
+                            }
+                        )
+
+                        HorizontalDivider()
+
+                        Text(
+                            "Sort",
+                            modifier = Modifier.padding(8.dp),
+                            style = MaterialTheme.typography.labelMedium
+                        )
+
+                        DropdownMenuItem(
+                            text = { Text("By due date") },
+                            onClick = {
+                                taskViewModel.onEvent(
+                                    TasksEvent.ChangeSortMode(SortMode.DueDateAsc)
+                                )
+                                menuExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Risk (High first)") },
+                            onClick = {
+                                taskViewModel.onEvent(
+                                    TasksEvent.ChangeSortMode(SortMode.RiskHighFirst)
+                                )
+                                menuExpanded = false
+                            }
+                        )
+                    }
                 }
             )
         },
@@ -80,7 +142,7 @@ fun TaskListScreen(
         }
     ) { padding ->
 
-        if (tasks.isEmpty()) {
+        if (uiState.tasks.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -97,73 +159,66 @@ fun TaskListScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(tasks) { task ->
-                    TaskCard(
-                        task = task,
-                        onClick = { onEditTask(task.id) },
-                        onToggleDone = { newValue ->
-                            taskViewModel.onEvent(
-                                TasksEvent.ToggleDone(taskId = task.id, newValue = newValue)
-                            )
-                        },
-                        onDelete = {
-                            taskViewModel.onEvent(
-                                TasksEvent.DeleteTask(taskId = task.id)
-                            )
+                items(uiState.tasks) { task ->
+
+                    val deadlineText = if (task.dueDateEpochDay == null) {
+                        "No deadline"
+                    } else {
+                        formatEpochDay(task.dueDateEpochDay)
+                    }
+
+                    val risk = RiskCalculator.calculate(task.dueDateEpochDay)
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onEditTask(task.id) }
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    task.title,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.weight(1f)
+                                )
+
+                                Checkbox(
+                                    checked = task.isDone,
+                                    onCheckedChange = {
+                                        taskViewModel.onEvent(
+                                            TasksEvent.ToggleDone(task.id, it)
+                                        )
+                                    }
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text("Course: ${task.courseName ?: "No course"}")
+                            Text("Deadline: $deadlineText")
+
+                            Spacer(modifier = Modifier.height(8.dp))
+                            RiskChip(risk = risk)
+
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Button(
+                                onClick = {
+                                    taskViewModel.onEvent(
+                                        TasksEvent.DeleteTask(task.id)
+                                    )
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.error
+                                )
+                            ) {
+                                Text("Delete")
+                            }
                         }
-                    )
+                    }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun TaskCard(
-    task: UiTask,
-    onClick: () -> Unit,
-    onToggleDone: (Boolean) -> Unit,
-    onDelete: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    task.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f)
-                )
-
-                Checkbox(
-                    checked = task.isDone,
-                    onCheckedChange = { onToggleDone(it) }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(6.dp))
-            Text("Course: ${task.courseName}", style = MaterialTheme.typography.bodyMedium)
-            Text("Deadline: ${task.deadlineText}", style = MaterialTheme.typography.bodyMedium)
-
-            Spacer(modifier = Modifier.height(8.dp))
-            AssistChip(
-                onClick = { },
-                label = { Text("Risk: ${task.riskLabel}") }
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-            Button(
-                onClick = onDelete,
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-            ) {
-                Text("Delete")
             }
         }
     }
