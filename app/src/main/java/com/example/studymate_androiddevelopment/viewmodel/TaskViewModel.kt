@@ -129,7 +129,12 @@ class TaskViewModel(
                 courseName = cleanCourseName
             )
 
-            repository.addTask(task)
+            try {
+                repository.addTask(task)
+            } catch (e: Exception) {
+                setError("Something went wrong while saving the task.")
+            }
+
         }
     }
 
