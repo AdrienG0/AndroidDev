@@ -2,11 +2,13 @@ package com.example.studymate_androiddevelopment.ui.components
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 import com.example.studymate_androiddevelopment.domain.RiskLevel
 
 @Composable
@@ -17,19 +19,19 @@ fun RiskChip(
     val (label, containerColor, labelColor) = when (risk) {
         RiskLevel.HIGH -> Triple(
             "High",
-            Color(0xFFD32F2F), // red
+            Color(0xFFD32F2F),
             Color.White
         )
 
         RiskLevel.MEDIUM -> Triple(
             "Medium",
-            Color(0xFFFFA000), // orange
+            Color(0xFFFFA000),
             Color.Black
         )
 
         RiskLevel.LOW -> Triple(
             "Low",
-            Color(0xFF388E3C), // green
+            Color(0xFF388E3C),
             Color.White
         )
     }
