@@ -143,19 +143,31 @@ class TaskViewModel(
 
     private fun toggleDone(taskId: Long, newValue: Boolean) {
         viewModelScope.launch {
-            repository.setTaskDone(taskId, newValue)
+            try {
+                repository.setTaskDone(taskId, newValue)
+            } catch (e: Exception) {
+                setError("Could not update the task status.")
+            }
         }
     }
 
     private fun deleteTask(taskId: Long) {
         viewModelScope.launch {
-            repository.deleteTask(taskId)
+            try {
+                repository.deleteTask(taskId)
+            } catch (e: Exception) {
+                setError("Could not delete the task.")
+            }
         }
     }
 
     private fun updateTask(task: TaskEntity) {
         viewModelScope.launch {
-            repository.updateTask(task)
+            try {
+                repository.updateTask(task)
+            } catch (e: Exception) {
+                setError("Could not update the task.")
+            }
         }
     }
 
