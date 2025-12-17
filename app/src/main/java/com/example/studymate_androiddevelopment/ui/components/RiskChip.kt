@@ -14,15 +14,33 @@ fun RiskChip(
     risk: RiskLevel,
     modifier: Modifier = Modifier
 ) {
-    val label = when (risk) {
-        RiskLevel.HIGH -> "High"
-        RiskLevel.MEDIUM -> "Medium"
-        RiskLevel.LOW -> "Low"
+    val (label, containerColor, labelColor) = when (risk) {
+        RiskLevel.HIGH -> Triple(
+            "High",
+            Color(0xFFD32F2F), // red
+            Color.White
+        )
+
+        RiskLevel.MEDIUM -> Triple(
+            "Medium",
+            Color(0xFFFFA000), // orange
+            Color.Black
+        )
+
+        RiskLevel.LOW -> Triple(
+            "Low",
+            Color(0xFF388E3C), // green
+            Color.White
+        )
     }
 
     AssistChip(
         onClick = {},
         label = { Text("Risk: $label") },
-        modifier = modifier.padding(top = 4.dp)
+        modifier = modifier,
+        colors = AssistChipDefaults.assistChipColors(
+            containerColor = containerColor,
+            labelColor = labelColor
+        )
     )
 }
