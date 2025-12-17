@@ -17,7 +17,6 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
-
 private fun formatEpochDayToInput(epochDay: Long): String {
     val millis = epochDay * 86_400_000L
     val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -34,22 +33,29 @@ fun AddEditTaskScreen(
     onBack: () -> Unit
 ) {
     val courseEntities by courseViewModel.courses.collectAsState()
-
     val tasksState by taskViewModel.uiState.collectAsState()
+
     val taskToEdit = remember(tasksState.tasks, taskId) {
         tasksState.tasks.firstOrNull { it.id == taskId }
     }
 
     var title by remember { mutableStateOf("") }
     var deadline by remember { mutableStateOf("") }
-
     var selectedCourse by remember { mutableStateOf<String?>(null) }
     var expanded by remember { mutableStateOf(false) }
 
     val selectedCourseEntity = courseEntities.firstOrNull { it.name == selectedCourse }
     val selectedCourseId = selectedCourseEntity?.id
 
-        LaunchedEffect(taskToEdit) {
+    /* ---------- NAVIGATIE BIJ SUCCES ---------- */
+    LaunchedEffect(tasksState.taskSaved) {
+        if (tasksState.taskSaved) {
+            taskViewModel.consumeTaskSaved()
+            onBack()
+        }
+    }
+
+    LaunchedEffect(taskToEdit) {
         if (taskToEdit != null) {
             title = taskToEdit.title
             deadline = taskToEdit.dueDateEpochDay?.let { formatEpochDayToInput(it) } ?: ""
@@ -67,10 +73,13 @@ fun AddEditTaskScreen(
         topBar = {
             TopAppBar(
                 title = { Text(if (taskToEdit == null) "Add Task" else "Edit Task") },
-                navigationIcon = { TextButton(onClick = onBack) { Text("Back") } }
+                navigationIcon = {
+                    TextButton(onClick = onBack) { Text("Back") }
+                }
             )
         }
     ) { padding ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -78,6 +87,7 @@ fun AddEditTaskScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
+
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
@@ -135,7 +145,6 @@ fun AddEditTaskScreen(
                     val dueDateMillis = parseDateToMillis(deadline)
 
                     if (taskToEdit == null) {
-
                         taskViewModel.onEvent(
                             TasksEvent.AddTask(
                                 title = cleanTitle,
@@ -150,7 +159,6 @@ fun AddEditTaskScreen(
                             title = cleanTitle,
                             description = taskToEdit.description,
                             dueDateEpochDay = dueDateMillis?.let { millis ->
-                                // zelfde conversie als ViewModel gebruikt (millis -> epochDay)
                                 val tz = TimeZone.getDefault()
                                 val offset = tz.getOffset(millis)
                                 val localMillis = millis + offset
@@ -160,11 +168,9 @@ fun AddEditTaskScreen(
                             courseName = selectedCourseEntity?.name
                         )
 
-                        taskViewModel.onEvent(TasksEvent.UpdateTask(updatedTask))
-                    }
-
-                    if (tasksState.errorMessage == null) {
-                        onBack()
+                        taskViewModel.onEvent(
+                            TasksEvent.UpdateTask(updatedTask)
+                        )
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),

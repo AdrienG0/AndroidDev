@@ -7,10 +7,7 @@ import com.example.studymate_androiddevelopment.data.repository.StudyRepository
 import com.example.studymate_androiddevelopment.domain.RiskCalculator
 import com.example.studymate_androiddevelopment.domain.RiskLevel
 import com.example.studymate_androiddevelopment.ui.events.TasksEvent
-import com.example.studymate_androiddevelopment.ui.state.RiskFilter
-import com.example.studymate_androiddevelopment.ui.state.SortMode
-import com.example.studymate_androiddevelopment.ui.state.TaskFilter
-import com.example.studymate_androiddevelopment.ui.state.TasksUiState
+import com.example.studymate_androiddevelopment.ui.state.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -68,11 +65,15 @@ class TaskViewModel(
     }
 
     private fun setError(message: String) {
-        _uiState.update { it.copy(errorMessage = message) }
+        _uiState.update { it.copy(errorMessage = message, taskSaved = false) }
     }
 
     private fun clearError() {
         _uiState.update { it.copy(errorMessage = null) }
+    }
+
+    fun consumeTaskSaved() {
+        _uiState.update { it.copy(taskSaved = false) }
     }
 
     private fun refreshOnce() {
@@ -92,6 +93,8 @@ class TaskViewModel(
         courseId: Long?,
         courseName: String?
     ) {
+        _uiState.update { it.copy(taskSaved = false) }
+
         val cleanTitle = title.trim()
         val cleanCourseName = courseName?.trim()
 
@@ -108,16 +111,14 @@ class TaskViewModel(
                 setError("Course is required.")
                 return
             }
-            else -> {
-                clearError()
-            }
+            else -> clearError()
         }
 
         viewModelScope.launch {
-            val dueDateEpochDay: Long? = dueDate.let { millis ->
+            val dueDateEpochDay = run {
                 val tz = TimeZone.getDefault()
-                val offset = tz.getOffset(millis)
-                val localMillis = millis + offset
+                val offset = tz.getOffset(dueDate)
+                val localMillis = dueDate + offset
                 Math.floorDiv(localMillis, 86_400_000L)
             }
 
@@ -131,15 +132,12 @@ class TaskViewModel(
 
             try {
                 repository.addTask(task)
+                _uiState.update { it.copy(taskSaved = true) }
             } catch (e: Exception) {
                 setError("Something went wrong while saving the task.")
             }
-
         }
     }
-
-
-
 
     private fun toggleDone(taskId: Long, newValue: Boolean) {
         viewModelScope.launch {
@@ -165,6 +163,7 @@ class TaskViewModel(
         viewModelScope.launch {
             try {
                 repository.updateTask(task)
+                _uiState.update { it.copy(taskSaved = true) }
             } catch (e: Exception) {
                 setError("Could not update the task.")
             }
@@ -177,14 +176,13 @@ class TaskViewModel(
         return applySort(afterRiskFilter, state.sortMode)
     }
 
-    private fun applyMainFilter(all: List<TaskEntity>, filter: TaskFilter): List<TaskEntity> {
-        return when (filter) {
+    private fun applyMainFilter(all: List<TaskEntity>, filter: TaskFilter): List<TaskEntity> =
+        when (filter) {
             TaskFilter.All -> all
             TaskFilter.Completed -> all.filter { it.isDone }
             TaskFilter.NotCompleted -> all.filter { !it.isDone }
             is TaskFilter.ByCourse -> all.filter { it.courseId == filter.courseId }
         }
-    }
 
     private fun applyRiskFilter(
         all: List<TaskEntity>,
@@ -193,32 +191,30 @@ class TaskViewModel(
         if (riskFilter == RiskFilter.All) return all
 
         return all.filter { task ->
-            val risk = RiskCalculator.calculate(task.dueDateEpochDay)
             when (riskFilter) {
-                RiskFilter.High -> risk == RiskLevel.HIGH
-                RiskFilter.Medium -> risk == RiskLevel.MEDIUM
-                RiskFilter.Low -> risk == RiskLevel.LOW
+                RiskFilter.High -> RiskCalculator.calculate(task.dueDateEpochDay) == RiskLevel.HIGH
+                RiskFilter.Medium -> RiskCalculator.calculate(task.dueDateEpochDay) == RiskLevel.MEDIUM
+                RiskFilter.Low -> RiskCalculator.calculate(task.dueDateEpochDay) == RiskLevel.LOW
                 RiskFilter.All -> true
             }
         }
     }
 
+    private fun applySort(all: List<TaskEntity>, sortMode: SortMode): List<TaskEntity> =
+        when (sortMode) {
+            SortMode.DueDateAsc ->
+                all.sortedWith(
+                    compareBy<TaskEntity> { it.dueDateEpochDay == null }
+                        .thenBy { it.dueDateEpochDay ?: Long.MAX_VALUE }
+                )
 
-    private fun applySort(all: List<TaskEntity>, sortMode: SortMode): List<TaskEntity> {
-        return when (sortMode) {
-            SortMode.DueDateAsc -> {
-                all.sortedWith(compareBy<TaskEntity> { it.dueDate == null }.thenBy { it.dueDate ?: Long.MAX_VALUE })
-            }
-
-            SortMode.RiskHighFirst -> {
-                all.sortedBy { task ->
-                    when (RiskCalculator.calculate(task.dueDateEpochDay)) {
+            SortMode.RiskHighFirst ->
+                all.sortedBy {
+                    when (RiskCalculator.calculate(it.dueDateEpochDay)) {
                         RiskLevel.HIGH -> 0
                         RiskLevel.MEDIUM -> 1
                         RiskLevel.LOW -> 2
                     }
                 }
-            }
         }
-    }
 }
